@@ -20,40 +20,34 @@ jobs:
 
     steps:
 
-      # 1. Checkout Source Code
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Generate Version (Git SHA)
       - name: Generate Version
         run: echo "VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-      # 3. Build Docker Image
       - name: Build Docker Image
         run: |
           docker build -t $REGISTRY/$IMAGE_NAME:$VERSION apps/backend
 
-      # 4. Scan Image (Security)
+      # ✅ FIXED TRIVY STEP
       - name: Scan Image with Trivy
-        run: |
-          docker run --rm aquasec/trivy image $REGISTRY/$IMAGE_NAME:$VERSION
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
-      # 5. Login to GitHub Container Registry
       - name: Login to GHCR
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u prudhvi25-ef --password-stdin
 
-      # 6. Push Docker Image
       - name: Push Image
         run: |
           docker push $REGISTRY/$IMAGE_NAME:$VERSION
 
-      # 7. Update Helm Values (Single Source of Truth)
       - name: Update Helm values.yaml
         run: |
           sed -i "s/tag:.*/tag: $VERSION/" $ENV_FILE
 
-      # 8. Commit & Push Updated Values
       - name: Commit Changes
         run: |
           git config user.name "ci-bot"
