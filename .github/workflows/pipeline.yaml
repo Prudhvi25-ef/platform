@@ -30,9 +30,9 @@ jobs:
         run: |
           docker build -t $REGISTRY/$IMAGE_NAME:$VERSION apps/backend
 
-      # ✅ FIXED TRIVY STEP
+      # ✅ FIXED TRIVY (WORKING VERSION)
       - name: Scan Image with Trivy
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
