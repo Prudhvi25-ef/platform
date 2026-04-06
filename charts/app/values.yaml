@@ -1,0 +1,5 @@
+image:
+  repository: ghcr.io/prudhvi25-ef/backend
+  tag: latest
+
+replicaCount: 1
